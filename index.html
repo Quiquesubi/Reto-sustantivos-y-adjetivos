@@ -171,7 +171,7 @@
 
     .progress-fill {
       height: 100%;
-      width: 10%;
+      width: 2%;
       background: linear-gradient(90deg, var(--primary), var(--accent));
       border-radius: 999px;
       transition: width 0.3s ease;
@@ -388,7 +388,7 @@
       <div class="hud">
         <span class="chip puntos" id="puntosChip">Puntos: 0</span>
         <span class="chip racha" id="rachaChip">Racha: 0</span>
-        <span class="chip rango" id="rangoChip">Rango: Cadete</span>
+        <span class="chip rango" id="rangoChip">Rango: Aprendiz</span>
       </div>
     </div>
 
@@ -645,10 +645,11 @@
     }
 
     function getRango(pts) {
-      if (pts >= 100) return "Rango: Maestro/a";
-      if (pts >= 60) return "Rango: Experto/a";
-      if (pts >= 30) return "Rango: Agente";
-      return "Rango: Cadete";
+      if (pts >= 600) return "Rango: Experto/a";
+      if (pts >= 420) return "Rango: Veterano/a";
+      if (pts >= 260) return "Rango: Explorador/a";
+      if (pts >= 120) return "Rango: Rastreador/a";
+      return "Rango: Aprendiz";
     }
 
     function actualizarHUD() {
@@ -657,7 +658,7 @@
       rangoChip.textContent = getRango(puntos);
       aciertosTexto.textContent = `Aciertos: ${aciertos}`;
       rondaTexto.textContent = `Misión ${indiceMision + 1}`;
-      const pct = Math.min(100, ((indiceMision + 1) / 10) * 100);
+      const pct = Math.min(100, ((indiceMision + 1) / 50) * 100);
       progressFill.style.width = `${pct}%`;
     }
 
@@ -914,7 +915,7 @@
     document.getElementById("pistaBtn").addEventListener("click", () => {
       const pool = getPool();
       const actual = pool[indiceMision % pool.length];
-      mostrarFeedback("info", `<strong>Pista de agente:</strong> ${actual.pista}`);
+      mostrarFeedback("info", `<strong>Pista de explorador:</strong> ${actual.pista}`);
     });
 
     document.getElementById("siguienteBtn").addEventListener("click", () => {
