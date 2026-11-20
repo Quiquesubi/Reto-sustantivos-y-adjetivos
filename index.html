@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reto Morfológico: Sustantivos y Adjetivos</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --ok: #15803d;
+      --ok-bg: #dcfce7;
+      --err: #b91c1c;
+      --err-bg: #fee2e2;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 760px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stats { display: flex; gap: 12px; font-weight: 700; }
+    .pill {
+      background: #eff6ff;
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+    }
+    .frase-box {
+      background: #f8fafc;
+      border-left: 5px solid var(--primary);
+      padding: 18px;
+      border-radius: 10px;
+      font-size: 1.25rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .destacada {
+      background: #fef08a;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    .grid-campos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 0.95rem;
+    }
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #e2e8f0; color: var(--text); }
+    .feedback {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      display: none;
+      line-height: 1.5;
+    }
+    .feedback.ok { display: block; background: var(--ok-bg); color: var(--ok); }
+    .feedback.err { display: block; background: var(--err-bg); color: var(--err); }
+    .feedback.info { display: block; background: #e0f2fe; color: #0369a1; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div>
+        <h1 style="margin:0; font-size:1.35rem;">Reto Morfológico</h1>
+        <small style="color:var(--muted);" id="rondaLabel">Ronda 1</small>
+      </div>
+      <div class="stats">
+        <span class="pill" id="puntosEl">Puntos: 0</span>
+        <span class="pill" id="rachaEl">Racha: 0</span>
+      </div>
+    </div>
+
+    <div class="frase-box" id="fraseEl"></div>
+
+    <form id="formAnalisis">
+      <div class="grid-campos" id="camposEl"></div>
+      <div class="acciones">
+        <button type="submit" class="btn-primary">Comprobar análisis</button>
+        <button type="button" class="btn-secondary" id="pistaBtn">Pedir pista</button>
+        <button type="button" class="btn-secondary" id="siguienteBtn">Siguiente ronda</button>
+      </div>
+    </form>
+
+    <div class="feedback" id="feedbackEl"></div>
+  </div>
+
+  <script>
+    const retos = [
+      {
+        frase: "La {biblioteca} silenciosa está llena de aventuras.",
+        objetivo: "biblioteca",
+        tipo: "sustantivo",
+        pista: "Es un lugar físico que puedes tocar; nombra a un solo edificio y en español decimos 'la biblioteca'.",
+        solucion: {
+          clase: "común",
+          naturaleza: "concreto",
+          conteo: "individual",
+          genero: "femenino",
+          numero: "singular"
+        }
+      },
+      {
+        frase: "El río Ebro es {más caudaloso que} ese arroyo.",
+        objetivo: "más caudaloso que",
+        tipo: "adjetivo",
+        pista: "Expresa una cualidad del río comparándola con otro elemento usando 'más ... que'.",
+        solucion: {
+          categoria: "adjetivo",
+          grado: "comparativo de superioridad",
+          genero: "masculino",
+          numero: "singular"
+        }
+      },
+      {
+        frase: "La {manada} hambrienta cruzó el valle nevado.",
+        objetivo: "manada",
+        tipo: "sustantivo",
+        pista: "En singular agrupa a varios animales de la misma especie.",
+        solucion: {
+          clase: "común",
+          naturaleza: "concreto",
+          conteo: "colectivo",
+          genero: "femenino",
+          numero: "singular"
+        }
+      },
+      {
+        frase: "Esta mochila es {tan ligera como} la tuya.",
+        objetivo: "tan ligera como",
+        tipo: "adjetivo",
+        pista: "Compara dos mochilas al mismo nivel mediante 'tan ... como'.",
+        solucion: {
+          categoria: "adjetivo",
+          grado: "comparativo de igualdad",
+          genero: "femenino",
+          numero: "singular"
+        }
+      },
+      {
+        frase: "La {valentía} de las deportistas emocionó al público.",
+        objetivo: "valentía",
+        tipo: "sustantivo",
+        pista: "Es una cualidad o sentimiento que no se percibe con los sentidos físicos.",
+        solucion: {
+          clase: "común",
+          naturaleza: "abstracto",
+          conteo: "individual",
+          genero: "femenino",
+          numero: "singular"
+        }
+      },
+      {
+        frase: "Aquel camino era {menos empinado que} el sendero anterior.",
+        objetivo: "menos empinado que",
+        tipo: "adjetivo",
+        pista: "Indica un grado inferior en la comparación usando 'menos ... que'.",
+        solucion: {
+          categoria: "adjetivo",
+          grado: "comparativo de inferioridad",
+          genero: "masculino",
+          numero: "singular"
+        }
+      }
+    ];
+
+    const esquemas = {
+      sustantivo: [
+        { id: "clase", label: "1. ¿Común o propio?", opciones: ["común", "propio"] },
+        { id: "naturaleza", label: "2. ¿Concreto o abstracto?", opciones: ["concreto", "abstracto"] },
+        { id: "conteo", label: "3. ¿Individual o colectivo?", opciones: ["individual", "colectivo"] },
+        { id: "genero", label: "4. Género", opciones: ["masculino", "femenino"] },
+        { id: "numero", label: "5. Número", opciones: ["singular", "plural"] }
+      ],
+      adjetivo: [
+        { id: "categoria", label: "1. Categoría", opciones: ["adjetivo"] },
+        { id: "grado", label: "2. Grado", opciones: [
+          "positivo",
+          "comparativo de inferioridad",
+          "comparativo de igualdad",
+          "comparativo de superioridad"
+        ]},
+        { id: "genero", label: "3. Género", opciones: ["masculino", "femenino"] },
+        { id: "numero", label: "4. Número", opciones: ["singular", "plural"] }
+      ]
+    };
+
+    let indice = 0;
+    let puntos = 0;
+    let racha = 0;
+    let resuelto = false;
+
+    const fraseEl = document.getElementById("fraseEl");
+    const camposEl = document.getElementById("camposEl");
+    const feedbackEl = document.getElementById("feedbackEl");
+    const puntosEl = document.getElementById("puntosEl");
+    const rachaEl = document.getElementById("rachaEl");
+    const rondaLabel = document.getElementById("rondaLabel");
+
+    function renderRonda() {
+      resuelto = false;
+      const reto = retos[indice % retos.length];
+      rondaLabel.textContent = `Ronda ${indice + 1} · Analiza: ${reto.tipo}`;
+      fraseEl.innerHTML = reto.frase.replace(
+        `{${reto.objetivo}}`,
+        `<span class="destacada">${reto.objetivo}</span>`
+      );
+
+      camposEl.innerHTML = esquemas[reto.tipo].map(campo => `
+        <div>
+          <label for="${campo.id}">${campo.label}</label>
+          <select id="${campo.id}" required>
+            <option value="">-- Selecciona --</option>
+            ${campo.opciones.map(op => `<option value="${op}">${op}</option>`).join("")}
+          </select>
+        </div>
+      `).join("");
+
+      feedbackEl.className = "feedback";
+      feedbackEl.style.display = "none";
+      feedbackEl.textContent = "";
+    }
+
+    document.getElementById("formAnalisis").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (resuelto) return;
+
+      const reto = retos[indice % retos.length];
+      const campos = esquemas[reto.tipo];
+      const errores = [];
+
+      for (const c of campos) {
+        const valor = document.getElementById(c.id).value;
+        if (valor !== reto.solucion[c.id]) {
+          errores.push(`${c.label}: lo correcto es <strong>${reto.solucion[c.id]}</strong>`);
+        }
+      }
+
+      if (errores.length === 0) {
+        resuelto = true;
+        racha += 1;
+        const ganancia = 10 + (racha > 1 ? 5 : 0);
+        puntos += ganancia;
+        puntosEl.textContent = `Puntos: ${puntos}`;
+        rachaEl.textContent = `Racha: ${racha}`;
+        feedbackEl.className = "feedback ok";
+        feedbackEl.style.display = "block";
+        feedbackEl.innerHTML = `<strong>¡Análisis perfecto!</strong> +${ganancia} puntos (racha actual: ${racha}). Pulsa <em>Siguiente ronda</em> para continuar.`;
+      } else {
+        racha = 0;
+        rachaEl.textContent = `Racha: 0`;
+        feedbackEl.className = "feedback err";
+        feedbackEl.style.display = "block";
+        feedbackEl.innerHTML = `<strong>Hay algún detalle por ajustar:</strong><br>${errores.join("<br>")}`;
+      }
+    });
+
+    document.getElementById("pistaBtn").addEventListener("click", () => {
+      const reto = retos[indice % retos.length];
+      feedbackEl.className = "feedback info";
+      feedbackEl.style.display = "block";
+      feedbackEl.innerHTML = `<strong>Pista:</strong> ${reto.pista}`;
+    });
+
+    document.getElementById("siguienteBtn").addEventListener("click", () => {
+      indice += 1;
+      renderRonda();
+    });
+
+    renderRonda();
+  </script>
+</body>
+</html>
