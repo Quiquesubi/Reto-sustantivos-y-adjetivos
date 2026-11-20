@@ -461,6 +461,7 @@
         frase: "La {biblioteca} silenciosa está llena de aventuras.",
         objetivo: "biblioteca",
         tipoReal: "sustantivo",
+        explicacionTipo: "<strong>\"Biblioteca\"</strong> es un <strong>sustantivo</strong> porque nombra un lugar o edificio (va acompañado del artículo <em>\"la\"</em> y es el núcleo del sujeto, mientras que <em>\"silenciosa\"</em> es el adjetivo que dice cómo es).",
         pista: "Es un lugar físico (común → concreto) que nombra a un solo edificio (individual); decimos 'la biblioteca'.",
         solucion: {
           clase: "común",
@@ -475,6 +476,7 @@
         frase: "El perro {valiente} cuidó la casa toda la noche.",
         objetivo: "valiente",
         tipoReal: "adjetivo",
+        explicacionTipo: "<strong>\"Valiente\"</strong> es un <strong>adjetivo</strong> porque acompaña al sustantivo <em>\"perro\"</em> para decir cómo es (expresa una cualidad suya).",
         pista: "Dice cómo es el perro en un grado normal (sin comparar ni exagerar al máximo).",
         solucion: {
           categoria: "adjetivo",
@@ -488,6 +490,7 @@
         frase: "{Pirineos} tiene cumbres nevadas en invierno.",
         objetivo: "Pirineos",
         tipoReal: "sustantivo",
+        explicacionTipo: "<strong>\"Pirineos\"</strong> es un <strong>sustantivo</strong> porque nombra una cordillera concreta (de hecho, va con mayúscula inicial por ser nombre propio).",
         pista: "Es un nombre propio: según el esquema, no baja a concreto/abstracto ni individual/colectivo, solo género y número.",
         solucion: {
           clase: "propio",
@@ -500,6 +503,7 @@
         frase: "La {manada} hambrienta cruzó el valle nevado.",
         objetivo: "manada",
         tipoReal: "sustantivo",
+        explicacionTipo: "<strong>\"Manada\"</strong> es un <strong>sustantivo</strong> porque nombra un grupo de animales (va detrás del artículo <em>\"la\"</em>, mientras que <em>\"hambrienta\"</em> es el adjetivo que describe cómo estaba esa manada).",
         pista: "Es común y concreto; en singular agrupa a varios animales de la misma especie.",
         solucion: {
           clase: "común",
@@ -514,6 +518,7 @@
         frase: "El río Ebro es {más caudaloso que} ese arroyo.",
         objetivo: "más caudaloso que",
         tipoReal: "adjetivo",
+        explicacionTipo: "<strong>\"Más caudaloso que\"</strong> funciona como un <strong>adjetivo</strong> en grado comparativo porque expresa una cualidad del sustantivo <em>\"río\"</em> (cuánta agua lleva) comparándolo con el arroyo.",
         pista: "Compara dos ríos poniendo a uno por encima con 'más ... que'.",
         solucion: {
           categoria: "adjetivo",
@@ -527,6 +532,7 @@
         frase: "Esta mochila es {tan ligera como} la tuya.",
         objetivo: "tan ligera como",
         tipoReal: "adjetivo",
+        explicacionTipo: "<strong>\"Tan ligera como\"</strong> es una construcción con <strong>adjetivo</strong> porque indica una cualidad del sustantivo <em>\"mochila\"</em> (su poco peso) comparándola en igualdad con otra.",
         pista: "Compara dos mochilas en igualdad de condiciones usando 'tan ... como'.",
         solucion: {
           categoria: "adjetivo",
@@ -540,6 +546,7 @@
         frase: "La {amistad} verdadera dura muchos años.",
         objetivo: "amistad",
         tipoReal: "sustantivo",
+        explicacionTipo: "<strong>\"Amistad\"</strong> es un <strong>sustantivo</strong> porque nombra un sentimiento o relación (lleva delante el artículo <em>\"la\"</em> y es el núcleo al que acompaña el adjetivo <em>\"verdadera\"</em>).",
         pista: "Es común y abstracto (no se toca): según el esquema, tras elegir abstracto pasas directo a género y número.",
         solucion: {
           clase: "común",
@@ -553,6 +560,7 @@
         frase: "Aquel camino era {menos empinado que} el sendero anterior.",
         objetivo: "menos empinado que",
         tipoReal: "adjetivo",
+        explicacionTipo: "<strong>\"Menos empinado que\"</strong> es una construcción con <strong>adjetivo</strong> porque describe cómo era el sustantivo <em>\"camino\"</em> (su pendiente) frente al sendero.",
         pista: "Compara dos caminos indicando un grado menor con 'menos ... que'.",
         solucion: {
           categoria: "adjetivo",
@@ -566,6 +574,7 @@
         frase: "La película fue {divertidísima} para toda la clase.",
         objetivo: "divertidísima",
         tipoReal: "adjetivo",
+        explicacionTipo: "<strong>\"Divertidísima\"</strong> es un <strong>adjetivo</strong> porque dice cómo fue el sustantivo <em>\"película\"</em>, expresando esa cualidad al máximo.",
         pista: "Expresa una cualidad en su grado máximo (termina en '-ísima').",
         solucion: {
           categoria: "adjetivo",
@@ -579,6 +588,7 @@
         frase: "El {enjambre} de abejas volaba cerca del huerto.",
         objetivo: "enjambre",
         tipoReal: "sustantivo",
+        explicacionTipo: "<strong>\"Enjambre\"</strong> es un <strong>sustantivo</strong> porque nombra a un conjunto de abejas (va precedido del artículo <em>\"el\"</em> y realiza la acción de volar).",
         pista: "Es común y concreto; en singular nombra a un conjunto de muchos insectos.",
         solucion: {
           clase: "común",
@@ -780,9 +790,10 @@
         racha = 0;
         actualizarHUD();
         camposPanel.classList.remove("visible");
+        const botonCorrecto = actual.tipoReal === "sustantivo" ? "Sustantivo" : "Adjetivo";
         mostrarFeedback(
           "err",
-          `<strong>¡Casi!</strong> Has elegido <strong>${tipo}</strong>, pero en esta frase <em>"${actual.objetivo}"</em> funciona como <strong>${actual.tipoReal}</strong>. Pulsa <strong>${actual.tipoReal === "sustantivo" ? "Sustantivo" : "Adjetivo"}</strong> para desbloquear su análisis.`
+          `<strong>¡Atención! No es un ${tipo}.</strong><br>${actual.explicacionTipo}<br><br>Pulsa ahora el botón <strong>${botonCorrecto}</strong> para desbloquear su análisis.`
         );
         return;
       }
