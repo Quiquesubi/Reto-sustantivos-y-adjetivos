@@ -295,6 +295,16 @@
       display: block;
     }
 
+    .ruta-ayuda {
+      font-size: 0.85rem;
+      color: var(--muted);
+      background: #eef2ff;
+      border-left: 4px solid var(--primary);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+
     .grid-rasgos {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
@@ -372,7 +382,7 @@
         <div class="logo-badge">OP</div>
         <div>
           <h1>Operación Palabra</h1>
-          <p class="subtitulo">Elige el tipo de palabra, analiza sus rasgos y sube de rango</p>
+          <p class="subtitulo">Elige el tipo de palabra, sigue el esquema y sube de rango</p>
         </div>
       </div>
       <div class="hud">
@@ -430,6 +440,7 @@
           <span class="step-num">2</span>
           <span id="paso2Titulo">Completa los rasgos de análisis:</span>
         </p>
+        <div class="ruta-ayuda" id="rutaAyuda" style="display:none;"></div>
         <div class="grid-rasgos" id="gridRasgos"></div>
       </div>
 
@@ -450,7 +461,7 @@
         frase: "La {biblioteca} silenciosa está llena de aventuras.",
         objetivo: "biblioteca",
         tipoReal: "sustantivo",
-        pista: "Piensa en un edificio con libros que puedes ver y tocar, nombra a uno solo y decimos 'la biblioteca'.",
+        pista: "Es un lugar físico (común → concreto) que nombra a un solo edificio (individual); decimos 'la biblioteca'.",
         solucion: {
           clase: "común",
           naturaleza: "concreto",
@@ -477,11 +488,9 @@
         frase: "{Pirineos} tiene cumbres nevadas en invierno.",
         objetivo: "Pirineos",
         tipoReal: "sustantivo",
-        pista: "Es el nombre propio de una cordillera concreta, formada por muchas montañas y en plural.",
+        pista: "Es un nombre propio: según el esquema, no baja a concreto/abstracto ni individual/colectivo, solo género y número.",
         solucion: {
           clase: "propio",
-          naturaleza: "concreto",
-          conteo: "individual",
           genero: "masculino",
           numero: "plural"
         }
@@ -491,7 +500,7 @@
         frase: "La {manada} hambrienta cruzó el valle nevado.",
         objetivo: "manada",
         tipoReal: "sustantivo",
-        pista: "En singular designa a un conjunto de animales que van juntos.",
+        pista: "Es común y concreto; en singular agrupa a varios animales de la misma especie.",
         solucion: {
           clase: "común",
           naturaleza: "concreto",
@@ -531,11 +540,10 @@
         frase: "La {amistad} verdadera dura muchos años.",
         objetivo: "amistad",
         tipoReal: "sustantivo",
-        pista: "Es un sentimiento o idea que no se puede tocar con las manos.",
+        pista: "Es común y abstracto (no se toca): según el esquema, tras elegir abstracto pasas directo a género y número.",
         solucion: {
           clase: "común",
           naturaleza: "abstracto",
-          conteo: "individual",
           genero: "femenino",
           numero: "singular"
         }
@@ -571,7 +579,7 @@
         frase: "El {enjambre} de abejas volaba cerca del huerto.",
         objetivo: "enjambre",
         tipoReal: "sustantivo",
-        pista: "Es un sustantivo en singular que nombra a un grupo de muchos insectos.",
+        pista: "Es común y concreto; en singular nombra a un conjunto de muchos insectos.",
         solucion: {
           clase: "común",
           naturaleza: "concreto",
@@ -582,31 +590,23 @@
       }
     ];
 
-    const esquemas = {
-      sustantivo: [
-        { id: "clase", label: "1. ¿Común o propio?", opciones: ["común", "propio"] },
-        { id: "naturaleza", label: "2. ¿Concreto o abstracto?", opciones: ["concreto", "abstracto"] },
-        { id: "conteo", label: "3. ¿Individual o colectivo?", opciones: ["individual", "colectivo"] },
-        { id: "genero", label: "4. Género", opciones: ["masculino", "femenino"] },
-        { id: "numero", label: "5. Número", opciones: ["singular", "plural"] }
-      ],
-      adjetivo: [
-        { id: "categoria", label: "1. Categoría", opciones: ["adjetivo"] },
-        { id: "grado", label: "2. Grado", opciones: [
-          "positivo",
-          "comparativo de inferioridad",
-          "comparativo de igualdad",
-          "comparativo de superioridad",
-          "superlativo"
-        ]},
-        { id: "genero", label: "3. Género", opciones: ["masculino", "femenino"] },
-        { id: "numero", label: "4. Número", opciones: ["singular", "plural"] }
-      ]
-    };
+    const camposAdjetivo = [
+      { id: "categoria", label: "1. Categoría", opciones: ["adjetivo"] },
+      { id: "grado", label: "2. Grado", opciones: [
+        "positivo",
+        "comparativo de inferioridad",
+        "comparativo de igualdad",
+        "comparativo de superioridad",
+        "superlativo"
+      ]},
+      { id: "genero", label: "3. Género", opciones: ["masculino", "femenino"] },
+      { id: "numero", label: "4. Número", opciones: ["singular", "plural"] }
+    ];
 
     let filtroNivel = "todos";
     let indiceMision = 0;
     let tipoElegido = null;
+    let estadoSustantivo = { clase: "", naturaleza: "", conteo: "", genero: "", numero: "" };
     let puntos = 0;
     let racha = 0;
     let aciertos = 0;
@@ -619,6 +619,7 @@
     const camposPanel = document.getElementById("camposPanel");
     const gridRasgos = document.getElementById("gridRasgos");
     const paso2Titulo = document.getElementById("paso2Titulo");
+    const rutaAyuda = document.getElementById("rutaAyuda");
     const feedbackEl = document.getElementById("feedbackEl");
     const puntosChip = document.getElementById("puntosChip");
     const rachaChip = document.getElementById("rachaChip");
@@ -660,6 +661,112 @@
       feedbackEl.innerHTML = "";
     }
 
+    function renderSelectHtml(id, label, opciones, valorActual) {
+      return `
+        <div class="rasgo-card">
+          <label for="${id}">${label}</label>
+          <select id="${id}" required>
+            <option value="">-- Elige una opción --</option>
+            ${opciones.map(op => `<option value="${op}" ${valorActual === op ? "selected" : ""}>${op}</option>`).join("")}
+          </select>
+        </div>
+      `;
+    }
+
+    function getCamposSustantivoActivos() {
+      const campos = [
+        renderSelectHtml("clase", "1. ¿Común o propio?", ["común", "propio"], estadoSustantivo.clase)
+      ];
+
+      if (estadoSustantivo.clase === "común") {
+        campos.push(
+          renderSelectHtml("naturaleza", "2. ¿Concreto o abstracto?", ["concreto", "abstracto"], estadoSustantivo.naturaleza)
+        );
+        if (estadoSustantivo.naturaleza === "concreto") {
+          campos.push(
+            renderSelectHtml("conteo", "3. ¿Individual o colectivo?", ["individual", "colectivo"], estadoSustantivo.conteo)
+          );
+          campos.push(
+            renderSelectHtml("genero", "4. Género", ["masculino", "femenino"], estadoSustantivo.genero),
+            renderSelectHtml("numero", "5. Número", ["singular", "plural"], estadoSustantivo.numero)
+          );
+        } else if (estadoSustantivo.naturaleza === "abstracto") {
+          campos.push(
+            renderSelectHtml("genero", "3. Género", ["masculino", "femenino"], estadoSustantivo.genero),
+            renderSelectHtml("numero", "4. Número", ["singular", "plural"], estadoSustantivo.numero)
+          );
+        }
+      } else if (estadoSustantivo.clase === "propio") {
+        campos.push(
+          renderSelectHtml("genero", "2. Género", ["masculino", "femenino"], estadoSustantivo.genero),
+          renderSelectHtml("numero", "3. Número", ["singular", "plural"], estadoSustantivo.numero)
+        );
+      }
+
+      return campos;
+    }
+
+    function actualizarRutaAyuda() {
+      if (tipoElegido !== "sustantivo") {
+        rutaAyuda.style.display = "none";
+        return;
+      }
+      rutaAyuda.style.display = "block";
+      if (!estadoSustantivo.clase) {
+        rutaAyuda.innerHTML = "<strong>Esquema del sustantivo:</strong> Empieza eligiendo <em>común</em> o <em>propio</em>.";
+      } else if (estadoSustantivo.clase === "propio") {
+        rutaAyuda.innerHTML = "<strong>Ruta Propio:</strong> En el esquema, <em>Propio</em> no tiene ramas de concreto/abstracto ni individual/colectivo. Indica directamente <strong>género</strong> y <strong>número</strong>.";
+      } else if (!estadoSustantivo.naturaleza) {
+        rutaAyuda.innerHTML = "<strong>Ruta Común:</strong> Ahora indica si es <em>concreto</em> o <em>abstracto</em>.";
+      } else if (estadoSustantivo.naturaleza === "abstracto") {
+        rutaAyuda.innerHTML = "<strong>Ruta Común → Abstracto:</strong> En el esquema, <em>Abstracto</em> no baja a individual/colectivo. Indica <strong>género</strong> y <strong>número</strong>.";
+      } else {
+        rutaAyuda.innerHTML = "<strong>Ruta Común → Concreto:</strong> Indica si es <em>individual</em> o <em>colectivo</em>, y completa <strong>género</strong> y <strong>número</strong>.";
+      }
+    }
+
+    function renderCamposSustantivo() {
+      gridRasgos.innerHTML = getCamposSustantivoActivos().join("");
+      actualizarRutaAyuda();
+
+      const claseEl = document.getElementById("clase");
+      const natEl = document.getElementById("naturaleza");
+      const conteoEl = document.getElementById("conteo");
+      const generoEl = document.getElementById("genero");
+      const numeroEl = document.getElementById("numero");
+
+      if (claseEl) {
+        claseEl.addEventListener("change", (e) => {
+          estadoSustantivo.clase = e.target.value;
+          estadoSustantivo.naturaleza = "";
+          estadoSustantivo.conteo = "";
+          renderCamposSustantivo();
+        });
+      }
+      if (natEl) {
+        natEl.addEventListener("change", (e) => {
+          estadoSustantivo.naturaleza = e.target.value;
+          estadoSustantivo.conteo = "";
+          renderCamposSustantivo();
+        });
+      }
+      if (conteoEl) {
+        conteoEl.addEventListener("change", (e) => {
+          estadoSustantivo.conteo = e.target.value;
+        });
+      }
+      if (generoEl) {
+        generoEl.addEventListener("change", (e) => {
+          estadoSustantivo.genero = e.target.value;
+        });
+      }
+      if (numeroEl) {
+        numeroEl.addEventListener("change", (e) => {
+          estadoSustantivo.numero = e.target.value;
+        });
+      }
+    }
+
     function seleccionarTipo(tipo) {
       if (resuelta) return;
       tipoElegido = tipo;
@@ -682,24 +789,27 @@
 
       limpiarFeedback();
       paso2Titulo.textContent = `Completa los rasgos de este ${tipo}:`;
-      gridRasgos.innerHTML = esquemas[tipo].map(campo => `
-        <div class="rasgo-card">
-          <label for="${campo.id}">${campo.label}</label>
-          <select id="${campo.id}" required>
-            <option value="">-- Elige una opción --</option>
-            ${campo.opciones.map(op => `<option value="${op}">${op}</option>`).join("")}
-          </select>
-        </div>
-      `).join("");
       camposPanel.classList.add("visible");
+
+      if (tipo === "sustantivo") {
+        estadoSustantivo = { clase: "", naturaleza: "", conteo: "", genero: "", numero: "" };
+        renderCamposSustantivo();
+      } else {
+        rutaAyuda.style.display = "none";
+        gridRasgos.innerHTML = camposAdjetivo.map(campo =>
+          renderSelectHtml(campo.id, campo.label, campo.opciones, "")
+        ).join("");
+      }
     }
 
     function renderMision() {
       resuelta = false;
       tipoElegido = null;
+      estadoSustantivo = { clase: "", naturaleza: "", conteo: "", genero: "", numero: "" };
       btnSustantivo.classList.remove("selected");
       btnAdjetivo.classList.remove("selected");
       camposPanel.classList.remove("visible");
+      rutaAyuda.style.display = "none";
       gridRasgos.innerHTML = "";
       limpiarFeedback();
 
@@ -748,13 +858,23 @@
         return;
       }
 
-      const campos = esquemas[actual.tipoReal];
       const errores = [];
 
-      for (const c of campos) {
-        const valor = document.getElementById(c.id).value;
-        if (valor !== actual.solucion[c.id]) {
-          errores.push(`${c.label}: toca revisar → <strong>${actual.solucion[c.id]}</strong>`);
+      if (actual.tipoReal === "sustantivo") {
+        const clavesEsperadas = Object.keys(actual.solucion);
+        for (const clave of clavesEsperadas) {
+          const el = document.getElementById(clave);
+          const valor = el ? el.value : "";
+          if (valor !== actual.solucion[clave]) {
+            errores.push(`<strong>${clave}</strong>: lo correcto según el esquema es <strong>${actual.solucion[clave]}</strong>`);
+          }
+        }
+      } else {
+        for (const c of camposAdjetivo) {
+          const valor = document.getElementById(c.id).value;
+          if (valor !== actual.solucion[c.id]) {
+            errores.push(`${c.label}: toca revisar → <strong>${actual.solucion[c.id]}</strong>`);
+          }
         }
       }
 
